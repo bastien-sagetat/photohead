@@ -14,7 +14,7 @@ OBJ           := $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
 CPPFLAGS += -I$(INC_DIR) -MMD -MP
 CFLAGS   += -g -Wall -Wextra -std=c++17
-LDLIBS   += -lstdc++
+LDLIBS   += -lstdc++ -lgphoto2
 
 # Define VERSION_HASH (git sha1) and VERSION_DATE (build date)
 $(eval DEF += -DVERSION_HASH='"$(shell git describe --dirty --always)"')
