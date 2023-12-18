@@ -4,7 +4,7 @@
 CC ?= g++
 
 SRC_DIR := src
-INC_DIR := include
+INC_DIR := include $(shell pkg-config --cflags opencv4)
 OBJ_DIR := obj
 BIN_DIR := bin
 
@@ -14,7 +14,7 @@ OBJ           := $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
 CPPFLAGS += -I$(INC_DIR) -MMD -MP
 CFLAGS   += -g -Wall -Wextra -std=c++17
-LDLIBS   += -lstdc++ -lgphoto2
+LDLIBS   += -lstdc++ -lgphoto2 $(shell pkg-config --libs opencv4)
 
 # Define VERSION_HASH (git sha1) and VERSION_DATE (build date)
 $(eval DEF += -DVERSION_HASH='"$(shell git describe --dirty --always)"')
