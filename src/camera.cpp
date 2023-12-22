@@ -85,6 +85,42 @@ namespace camera
         }
     }
 
+    std::string File::Mime() const
+    {
+	    const char *mime;
+
+        int ret = gp_file_get_mime_type (gp_file_, &mime);
+        if (ret < GP_OK)
+        {
+            throw camera::ErrorCodeException(ret, "Call to gp_file_get_mime_type() failed");
+        }
+        return std::string(mime);
+    }
+
+    const char* File::Data() const
+    {
+        const char *data;
+        unsigned long int size;
+	    int ret = gp_file_get_data_and_size (gp_file_, &data, &size);
+        if (ret < GP_OK)
+        {
+            throw camera::ErrorCodeException(ret, "Call to gp_file_get_data_and_size() failed");
+        }
+        return data;
+    }
+
+    unsigned long int File::Size() const
+    {
+        const char *data;
+        unsigned long int size;
+	    int ret = gp_file_get_data_and_size (gp_file_, &data, &size);
+        if (ret < GP_OK)
+        {
+            throw camera::ErrorCodeException(ret, "Call to gp_file_get_data_and_size() failed");
+        }
+        return size;
+    }
+
     // Camera class implementation
 
     Camera::Camera(const Context &context):
