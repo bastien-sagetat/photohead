@@ -7,6 +7,9 @@
 #include "camera.h"
 #include "camera_exceptions.h"
 #include <iostream>
+//#include <opencv2/core/mat.hpp>
+//#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>
 
 /**
  * \brief Print camera error messages. Should be registered as a camera context callback.
@@ -34,6 +37,7 @@ int main(int argc, char** argv)
     camera::Context context(OnCameraErrorMessage, OnCameraStatusMessage);
     camera::Camera camera(context);
     camera::File file;
+    cv::Mat Image;
 
     (void) (argc);
     (void) (argv);
@@ -53,17 +57,29 @@ int main(int argc, char** argv)
 
         camera.CapturePreview(file);
 
-        file.Save("preview.jpg");
+        //file.Save("preview.jpg");
+
+        Image = cv::imdecode(cv::Mat(1, (int)file.Size(), CV_8UC1, (void *)file.Data()), cv::IMREAD_UNCHANGED);
+
+        cv::namedWindow("Camera image", cv::WINDOW_AUTOSIZE);
+        if (!(Image.empty()))
+        {
+            cv::imshow("Camera image", Image);
+        }
+        cv::waitKey(0);
     }
     catch (const camera::ErrorCodeException &e)
     {
         std::cerr << "Camera error: " << e.what() << std::endl;
         std::cerr << "Error code: " << e.GetResultCode() << std::endl;
-
     }
     catch (const camera::Exception &e)
     {
         std::cerr << "Camera error: " << e.what() << std::endl;
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
     }
 
     std::cout << "object-detection program ended" << std::endl;
