@@ -50,6 +50,20 @@ namespace camera
 		 * \brief Save a camera file (most probably an image) to the local file system
          */
         void Save(const std::filesystem::path &file_path) const;
+        /**
+		 * \brief Get file mime type (e.g.: image/jpeg)
+         */
+        std::string Mime() const;
+        /**
+		 * \brief Get file data
+         */
+        const char* Data() const;
+        /**
+		 * \brief Get file data size
+         */
+        unsigned long int Size() const;
+
+
     private:
         CameraFile *gp_file_;
         File(File const&)           = delete;
