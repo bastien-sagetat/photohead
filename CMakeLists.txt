@@ -13,6 +13,8 @@ set(SRCS
     ${SRC_DIR}/camera.cpp
 )
 
+configure_file(${SRC_DIR}/config.h.in ${SRC_DIR}/config.h)
+
 include_directories(${SRC_DIR})
 
 add_executable(${PROJECT_NAME} ${SRCS})

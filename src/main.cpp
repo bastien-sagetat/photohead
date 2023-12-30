@@ -4,6 +4,7 @@
  * Created on: 4 December 2023
  */
 
+#include "config.h"
 #include "camera.h"
 #include "camera_exceptions.h"
 #include <iostream>
@@ -43,7 +44,7 @@ int main(int argc, char** argv)
     (void) (argv);
 
     std::cout << "Starting object-detection program" << std::endl;
-    // TODO: print version infos
+    std::cout << "Version : " << VERSION_MAJOR << "." << VERSION_MINOR << "." << VERSION_PATCH << std::endl;
 
     try
     {
