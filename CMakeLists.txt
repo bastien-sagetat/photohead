@@ -4,6 +4,8 @@ project(object-detection LANGUAGES CXX VERSION 0.0.1)
 
 #TODO: Add flags (-g -Wall -Wextra -std=c++17)
 
+find_library(gphoto2_LIB gphoto2 REQUIRED)
+
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
@@ -17,4 +19,4 @@ include_directories(${SRC_DIR})
 
 add_executable(${PROJECT_NAME} ${SRCS})
 
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${gphoto2_LIB} ${OpenCV_LIBS})
