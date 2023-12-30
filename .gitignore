@@ -2,3 +2,4 @@
 build/
 untracked/
 *.jpg
+src/config.h
