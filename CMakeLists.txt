@@ -7,6 +7,10 @@ find_library(gphoto2_LIB gphoto2 REQUIRED)
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
+# tensorflow-liteConfig.cmake does not seem to do much.
+# keep associated find_package() in comment just for the record.
+# find_package(tensorflow-lite REQUIRED)
+
 set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
 set(SRCS
     ${SRC_DIR}/main.cpp
@@ -29,4 +33,5 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} PRIVATE
     ${gphoto2_LIB}
     ${OpenCV_LIBS}
+    tensorflow-lite
 )
