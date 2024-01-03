@@ -7,60 +7,12 @@
 #include "config.h"
 #include "camera.h"
 #include "camera_exceptions.h"
+#include "object_detection.h"
+#include <stdint.h>
 #include <iostream>
 #include <fstream>
-#include <opencv2/opencv.hpp>
-#include <opencv2/dnn.hpp>
+#include <thread>
 #include <opencv2/highgui.hpp>
-#include <opencv2/core/ocl.hpp>
-#include "tensorflow/lite/interpreter.h"
-#include "tensorflow/lite/kernels/register.h"
-#include "tensorflow/lite/string_util.h"
-#include "tensorflow/lite/model.h"
-
-std::vector<std::string> Labels;
-std::unique_ptr<tflite::Interpreter> interpreter;
-
-static bool getFileContent(std::string fileName)
-{
-	std::ifstream in(fileName.c_str());
-	if(!in.is_open()) return false;
-
-	std::string str;
-	while (std::getline(in, str))
-	{
-		if(str.size()>0) Labels.push_back(str);
-	}
-	in.close();
-	return true;
-}
-
-void detect_from_video(cv::Mat &src)
-{
-    cv::Mat image;
-
-    cv::resize(src, image, cv::Size(300,300));
-    memcpy(interpreter->typed_input_tensor<uchar>(0), image.data, image.total() * image.elemSize());
-
-    interpreter->SetAllowFp16PrecisionForFp32(true);
-    interpreter->SetNumThreads(4);
-
-    interpreter->Invoke();
-
-    const float* detection_classes=interpreter->tensor(interpreter->outputs()[1])->data.f;
-    const float* detection_scores = interpreter->tensor(interpreter->outputs()[2])->data.f;
-    const int    num_detections = *interpreter->tensor(interpreter->outputs()[3])->data.f;
-
-    const float confidence_threshold = 0.5;
-    for(int i = 0; i < num_detections; i++)
-    {
-        if(detection_scores[i] > confidence_threshold)
-        {
-            int  det_index = (int)detection_classes[i]+1;
-            std::cout << "object: " <<  Labels[det_index].c_str() << std::endl;
-        }
-    }
-}
 
 /**
  * \brief Print camera error messages. Should be registered as a camera context callback.
@@ -88,7 +40,8 @@ int main(int argc, char** argv)
     camera::Context context(OnCameraErrorMessage, OnCameraStatusMessage);
     camera::Camera camera(context);
     camera::File file;
-    cv::Mat Image;
+    cv::Mat image;
+    object_detection::ObjectDetector object_detector(SCORE_THRESHOLD_DEFAULT);
 
     (void) (argc);
     (void) (argv);
@@ -102,31 +55,21 @@ int main(int argc, char** argv)
 
         //std::cout << "Summary:" << std::endl << camera.Summary()  << std::endl;
 
-        std::unique_ptr<tflite::FlatBufferModel> model = tflite::FlatBufferModel::BuildFromFile("MobileNetv1-SSD.tflite");
-        tflite::ops::builtin::BuiltinOpResolver resolver;
-        tflite::InterpreterBuilder(*model.get(), resolver)(&interpreter);
-        interpreter->AllocateTensors();
-
-        bool result = getFileContent("labels_COCO.txt");
-        if(!result)
-        {
-            std::cout << "loading labels failed" << std::endl;
-            exit(-1);
-        }
+        object_detector.BuildModel("model/MobileNetv1-SSD.tflite", "model/labels_COCO.txt");
 
         camera.CapturePreview(file);
 
-        //file.Save("preview.jpg");
+        image = cv::imdecode(cv::Mat(1, (int)file.Size(), CV_8UC1, (void *)file.Data()), cv::IMREAD_UNCHANGED);
 
-        Image = cv::imdecode(cv::Mat(1, (int)file.Size(), CV_8UC1, (void *)file.Data()), cv::IMREAD_UNCHANGED);
+        object_detector.RunInference(image, std::thread::hardware_concurrency());
+
+        object_detector.ApplyOverlay(image);
 
         cv::namedWindow("Camera image", cv::WINDOW_AUTOSIZE);
-        if (!(Image.empty()))
+        if (!(image.empty()))
         {
-            cv::imshow("Camera image", Image);
+            cv::imshow("Camera image", image);
         }
-
-        detect_from_video(Image);
 
         cv::waitKey(0);
     }

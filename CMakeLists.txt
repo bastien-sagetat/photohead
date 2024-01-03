@@ -15,6 +15,7 @@ set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
 set(SRCS
     ${SRC_DIR}/main.cpp
     ${SRC_DIR}/camera.cpp
+    ${SRC_DIR}/object_detection.cpp
 )
 
 configure_file(${SRC_DIR}/config.h.in ${SRC_DIR}/config.h)
