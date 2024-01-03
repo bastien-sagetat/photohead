@@ -19,8 +19,8 @@ set(SRCS
 
 configure_file(${SRC_DIR}/config.h.in ${SRC_DIR}/config.h)
 
-configure_file(labels_COCO.txt ${CMAKE_CURRENT_BINARY_DIR}/labels_COCO.txt COPYONLY)
-configure_file(MobileNetv1-SSD.tflite ${CMAKE_CURRENT_BINARY_DIR}/MobileNetv1-SSD.tflite COPYONLY)
+configure_file(model/labels_COCO.txt ${CMAKE_CURRENT_BINARY_DIR}/model/labels_COCO.txt COPYONLY)
+configure_file(model/MobileNetv1-SSD.tflite ${CMAKE_CURRENT_BINARY_DIR}/model/MobileNetv1-SSD.tflite COPYONLY)
 
 include_directories(${SRC_DIR})
 
