@@ -97,7 +97,9 @@ namespace camera
         const Context &context_;
         GPCamera *gp_camera_;
         bool initialized_;
-        Camera(File const&)           = delete;
+
+        // Disable copy
+        Camera(Camera const&)         = delete;
         void operator=(Camera const&) = delete;
     };
 }
