@@ -10,6 +10,7 @@
 #include <gphoto2/gphoto2.h>
 #include <string>
 #include <filesystem>
+#include <exception>
 
 namespace camera
 {
@@ -101,6 +102,18 @@ namespace camera
         // Disable copy
         Camera(Camera const&)         = delete;
         void operator=(Camera const&) = delete;
+    };
+
+    /**
+     * \class CameraException
+     * Camera exception
+     */
+    class CameraException : public std::runtime_error
+    {
+    public:
+        CameraException(std::string &&message):
+            std::runtime_error(message)
+        {}
     };
 }
 

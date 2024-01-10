@@ -6,7 +6,6 @@
 
 #include "config.h"
 #include "camera.h"
-#include "camera_exceptions.h"
 #include "object_detection.h"
 #include <stdint.h>
 #include <iostream>
@@ -72,15 +71,6 @@ int main(int argc, char** argv)
         }
 
         cv::waitKey(0);
-    }
-    catch (const camera::ErrorCodeException &e)
-    {
-        std::cerr << "Camera error: " << e.what() << std::endl;
-        std::cerr << "Error code: " << e.GetResultCode() << std::endl;
-    }
-    catch (const camera::Exception &e)
-    {
-        std::cerr << "Camera error: " << e.what() << std::endl;
     }
     catch (const std::exception &e)
     {
