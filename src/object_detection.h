@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <string>
 #include <filesystem>
+#include <exception>
 #include <tensorflow/lite/interpreter.h>
 #include <tensorflow/lite/model.h>
 #include <opencv2/opencv.hpp>
@@ -19,6 +20,10 @@
 
 namespace object_detection
 {
+    /**
+     * \class Object
+     * Aggregate attibrutes of a single detected object (e.g.: coordinates, label)
+     */
     class Object
     {
     public:
@@ -51,12 +56,26 @@ namespace object_detection
         const float center_y_;    // y coordinate of the object's center
     };
 
+    /**
+     * \class ObjectDetector
+     * Build and run the object detection model.
+     * Once the object detection model has been run, the detected objects can be retrieved using the appropriate getter function.
+     */
     class ObjectDetector
     {
     public:
         ObjectDetector(const float score_threshold);
+        /**
+		 * \brief Build the object detection model.
+         */
         void BuildModel(const std::filesystem::path &model_path, const std::filesystem::path &labels_path);
+        /**
+		 * \brief Run the object detection model on the given image.
+         */
         void RunInference(const cv::Mat &image, int num_of_threads);
+        /**
+		 * \brief Apply an overlay on the given image to add some info on it (e.g.: detected object's rectangle boundaries).
+         */
         void ApplyOverlay(cv::Mat &image);
         // Getter(s)
         int Width() const;
@@ -67,7 +86,6 @@ namespace object_detection
         const std::vector<Object>& Objects() const;
 
     private:
-
         const float score_threshold_;
         std::vector<std::string> labels_;
         std::unique_ptr<tflite::FlatBufferModel> model_;
@@ -78,12 +96,22 @@ namespace object_detection
         TfLiteType  input_type_;
         std::vector<Object> objects_;
         int64_t timespan_;
-
         static std::vector<std::string> ReadLabels(const std::filesystem::path &labels_path);
-
         // Disable copy
         ObjectDetector(ObjectDetector const&) = delete;
         void operator=(ObjectDetector const&) = delete;
+    };
+
+    /**
+     * \class ObjectDetectionException
+     * Object detection exception
+     */
+    class ObjectDetectionException : public std::runtime_error
+    {
+    public:
+        ObjectDetectionException(std::string &&message):
+            std::runtime_error(message)
+        {}
     };
 }
 

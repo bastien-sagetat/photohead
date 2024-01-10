@@ -10,7 +10,6 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
-#include <exception>
 #include <tensorflow/lite/interpreter.h>
 #include <tensorflow/lite/kernels/register.h>
 #include <tensorflow/lite/model.h>
@@ -69,8 +68,7 @@ namespace object_detection
         model_ = tflite::FlatBufferModel::BuildFromFile(model_path.c_str());
         if (!model_)
         {
-            // TODO: use custom exception
-            std::runtime_error("Fail to build FlatBufferModel from file: " + model_path.string());
+            throw ObjectDetectionException("Fail to build FlatBufferModel from file: " + model_path.string());
         }
 
         labels_ = ReadLabels(labels_path);
@@ -79,15 +77,13 @@ namespace object_detection
         status_code = tflite::InterpreterBuilder(*model_, resolver)(&interpreter_);
         if (status_code != kTfLiteOk)
         {
-            // TODO: use custom exception
-            std::runtime_error("Fail to build interpreter. errror code: " + std::to_string(status_code));
+            throw ObjectDetectionException("Fail to build interpreter. errror code: " + std::to_string(status_code));
         }
 
         status_code = interpreter_->AllocateTensors();
         if (status_code != kTfLiteOk)
         {
-            // TODO: use custom exception
-            std::runtime_error("Failed to allocate tensors. errror code: " + std::to_string(status_code));
+            throw ObjectDetectionException("Failed to allocate tensors. errror code: " + std::to_string(status_code));
         }
 
         const auto& dimensions = interpreter_->tensor(interpreter_->inputs()[0])->dims;
@@ -186,8 +182,7 @@ namespace object_detection
 
         if(!ifs.is_open())
         {
-            // TODO: use custom exception
-            std::runtime_error("Fail to read labels from file: " + labels_path.string());
+            throw ObjectDetectionException("Fail to read labels from file: " + labels_path.string());
         }
 
         while (std::getline(ifs, label))
