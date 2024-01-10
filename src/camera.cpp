@@ -5,7 +5,6 @@
  */
 
 #include "camera.h"
-#include "camera_exceptions.h"
 #include <iostream>
 #include <string>
 #include <filesystem>
@@ -37,13 +36,13 @@ namespace camera
     {
         if ((!error_func) || (!status_func))
         {
-            throw camera::Exception("camera::Context:Context constructor called with NULL parameter(s)");
+            throw CameraException("camera::Context:Context constructor called with NULL parameter(s)");
         }
 
         gp_context_ = gp_context_new();
         if (!gp_context_)
         {
-            throw camera::Exception("Call to gp_context_new() failed");
+            throw CameraException("Call to gp_context_new() failed");
         }
 
         gp_context_set_error_func(gp_context_, ContextErrorHandler, static_cast<void*>(this));
@@ -67,7 +66,7 @@ namespace camera
         int ret = gp_file_new(&gp_file_);
         if (ret < GP_OK)
         {
-            throw camera::ErrorCodeException(ret, "Call to gp_file_new() failed");
+            throw CameraException("Call to gp_file_new() failed. error code: " + std::to_string(ret));
         }
     }
 
@@ -81,7 +80,7 @@ namespace camera
         int ret = gp_file_save(gp_file_, file_path.c_str());
         if (ret < GP_OK)
         {
-            throw camera::ErrorCodeException(ret, "Call to gp_file_save() failed");
+            throw CameraException("Call to gp_file_save() failed. error code: " + std::to_string(ret));
         }
     }
 
@@ -92,7 +91,7 @@ namespace camera
         int ret = gp_file_get_mime_type (gp_file_, &mime);
         if (ret < GP_OK)
         {
-            throw camera::ErrorCodeException(ret, "Call to gp_file_get_mime_type() failed");
+            throw CameraException("Call to gp_file_get_mime_type() failed. error code: " + std::to_string(ret));
         }
         return std::string(mime);
     }
@@ -104,7 +103,7 @@ namespace camera
 	    int ret = gp_file_get_data_and_size (gp_file_, &data, &size);
         if (ret < GP_OK)
         {
-            throw camera::ErrorCodeException(ret, "Call to gp_file_get_data_and_size() failed");
+            throw CameraException("Call to gp_file_get_data_and_size() failed. error code: " + std::to_string(ret));
         }
         return data;
     }
@@ -116,7 +115,7 @@ namespace camera
 	    int ret = gp_file_get_data_and_size (gp_file_, &data, &size);
         if (ret < GP_OK)
         {
-            throw camera::ErrorCodeException(ret, "Call to gp_file_get_data_and_size() failed");
+            throw CameraException("Call to gp_file_get_data_and_size() failed. error code: " + std::to_string(ret));
         }
         return size;
     }
@@ -133,7 +132,7 @@ namespace camera
         ret = gp_camera_new(&gp_camera_);
 	    if (ret < GP_OK)
         {
-            throw camera::ErrorCodeException(ret, "Call to gp_camera_new() failed");
+            throw CameraException("Call to gp_camera_new() failed. error code: " + std::to_string(ret));
         }
     }
 
@@ -151,7 +150,8 @@ namespace camera
         int ret = gp_camera_init(gp_camera_, context_.gp_context_);
         if (ret < GP_OK)
         {
-            throw camera::ErrorCodeException(ret, "Call to gp_camera_init() failed");
+            throw CameraException("Call to gp_camera_init() failed. error code: " + std::to_string(ret));
+
         }
         initialized_ = true;
     }
@@ -162,13 +162,13 @@ namespace camera
 
         if (!initialized_)
         {
-            throw camera::Exception("Call to camera::Camera::Summary() failed because the camera is uninitialized");
+            throw CameraException("Call to camera::Camera::Summary() failed because the camera is uninitialized");
         }
 
         int ret = gp_camera_get_summary(gp_camera_, &text, context_.gp_context_);
         if (ret < GP_OK)
         {
-            throw camera::ErrorCodeException(ret, "Call to gp_camera_get_summary() failed");
+            throw CameraException("Call to gp_camera_get_summary() failed. error code: " + std::to_string(ret));
         }
 
         return std::string(text.text);
@@ -178,13 +178,13 @@ namespace camera
     {
         if (!initialized_)
         {
-            throw camera::Exception("Call to camera::Camera::CapturePreview() failed because the camera is uninitialized");
+            throw CameraException("Call to camera::Camera::CapturePreview() failed because the camera is uninitialized");
         }
 
         int ret = gp_camera_capture_preview(gp_camera_, file.gp_file_, context_.gp_context_);
         if (ret < GP_OK)
         {
-            throw camera::ErrorCodeException(ret, "Call to gp_camera_capture_preview() failed");
+            throw CameraException("Call to gp_camera_capture_preview() failed. error code: " + std::to_string(ret));
         }
     }
 }
