@@ -48,8 +48,7 @@ namespace object_detection
 
     // ObjectDetector class
 
-    ObjectDetector::ObjectDetector(const float score_threshold):
-        score_threshold_(score_threshold),
+    ObjectDetector::ObjectDetector():
         labels_(),
         input_width_(),
         input_height_(),
@@ -93,7 +92,7 @@ namespace object_detection
         input_type_ = interpreter_->tensor(interpreter_->inputs()[0])->type;
     }
 
-    void ObjectDetector::RunInference(const cv::Mat &image, int num_of_threads)
+    void ObjectDetector::RunInference(const cv::Mat &image, float score_threshold, int num_of_threads)
     {
         // TODO: check that input_type_ == kTfLiteUInt8, input_channels_==3, and image.type() == CV_8UC3
 
@@ -121,7 +120,7 @@ namespace object_detection
         objects_.clear();
         for(int i = 0; i < num_detections; i++)
         {
-            if(scores[i] > score_threshold_)
+            if(scores[i] > score_threshold)
             {
                 int  class_idx = (int)classes[i] + 1;
                 // Coordinate's origin is at the top-left corner of the image.

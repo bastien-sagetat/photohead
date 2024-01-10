@@ -64,7 +64,7 @@ namespace object_detection
     class ObjectDetector
     {
     public:
-        ObjectDetector(const float score_threshold);
+        ObjectDetector();
         /**
 		 * \brief Build the object detection model.
          */
@@ -72,7 +72,7 @@ namespace object_detection
         /**
 		 * \brief Run the object detection model on the given image.
          */
-        void RunInference(const cv::Mat &image, int num_of_threads);
+        void RunInference(const cv::Mat &image, float score_threshold, int num_of_threads);
         /**
 		 * \brief Apply an overlay on the given image to add some info on it (e.g.: detected object's rectangle boundaries).
          */
@@ -86,7 +86,6 @@ namespace object_detection
         const std::vector<Object>& Objects() const;
 
     private:
-        const float score_threshold_;
         std::vector<std::string> labels_;
         std::unique_ptr<tflite::FlatBufferModel> model_;
         std::unique_ptr<tflite::Interpreter> interpreter_;
