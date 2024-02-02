@@ -1,1 +1,1 @@
-# owleye software
+# owleye software application (Linux)
