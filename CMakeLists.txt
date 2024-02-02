@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 
-project(object-detection LANGUAGES CXX VERSION 0.0.1)
+project(owleye LANGUAGES CXX VERSION 0.0.1)
 
 find_library(gphoto2_LIB gphoto2 REQUIRED)
 

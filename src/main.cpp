@@ -1,6 +1,6 @@
 /*
  * File: main.cpp
- * Description: object-detection program entry point.
+ * Description: owl-eye program entry point.
  * Created on: 4 December 2023
  */
 
