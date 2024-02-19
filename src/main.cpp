@@ -1,6 +1,6 @@
 /*
  * File: main.cpp
- * Description: owl-eye program entry point.
+ * Description: Photohead application entry point.
  * Created on: 4 December 2023
  */
 
@@ -57,7 +57,7 @@ static void OnCameraStatusMessage(const char *message)
 }
 
 /**
- * \brief Program entry point.
+ * \brief Application entry point.
  */
 int main(int argc, char** argv)
 {
