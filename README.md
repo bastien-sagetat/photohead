@@ -21,9 +21,9 @@ This list is not exhaustive, and other features may be added during development.
   <img src="doc/res/global_system_overview.png" alt="image" width="700" height="auto">
 </p>
 
-## Repositories
+## Project tree
 
-The project is divided into 3 repositories:
+The project is divided into 3 folders:
 
 - [soft](soft/README.md): contains the application code running on the Raspberry Pi 5.
 - [mech](mech/README.md): contains the mechanical design files.(e.g.: 3D printed parts)
