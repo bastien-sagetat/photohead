@@ -124,7 +124,7 @@ namespace object_detection
             {
                 int  class_idx = (int)classes[i] + 1;
                 // Coordinate's origin is at the top-left corner of the image.
-                // All coordinates are normalized between 0.0 and 1.1 (inclusive)
+                // All coordinates are normalized between 0.0 and 1.0 (inclusive)
                 float y0 = locations[4*i];   // y coordinate of the object's top-left corner
                 float x0 = locations[4*i+1]; // x coordinate of the object's top-left corner
                 float y1 = locations[4*i+2]; // y coordinate of the object's bottom-right corner
