@@ -79,7 +79,7 @@ int main(int argc, char** argv)
         signal(SIGINT, OnProcessSignal);
         signal(SIGTERM, OnProcessSignal);
 
-        // Initialize the DLSR camera
+        // Initialize the camera
         camera.Init();
         //std::cout << "Summary:" << std::endl << camera.Summary()  << std::endl;
 
@@ -92,7 +92,7 @@ int main(int argc, char** argv)
         // Acquisition/processing loop.
         while (!termination_requested)
         {
-            // Get the camera preview image from the DLSR camera.
+            // Get the camera preview image from the camera.
             // Note that the preview image file is never saved on the filesystem.
             camera.CapturePreview(camera_image_file);
 
