@@ -270,6 +270,26 @@ Note that you will find in the build/ folder, a file called install_manifest.txt
 
 ## Enabling PWM
 
+https://blog.oddbit.com/post/2017-09-26-some-notes-on-pwm-on-the-raspb/
+
+In order to have the hardware PWM activated on the Raspberry Pi, you'll have to edit the /boot/config.txt file and add an overlay.
+Edit the /boot/firmware/config.txt file and add the dtoverlay line in the file:
+
+Now /boot/firmware/config.txt (not /boot/config.txt)
+
+sudo nano /boot/firmware/config.txt
+
+dtoverlay=pwm-2chan
+
+reboot
+
+/sys/class/pwm/
+
+pin 18
+echo 0 > export
+
+pin 19
+echo 1 > export
 
 ## Usefull links
 - [libgphoto2 supported cameras](http://www.gphoto.org/proj/libgphoto2/support.php)
