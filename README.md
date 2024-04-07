@@ -9,10 +9,16 @@ A Raspberry Pi 5 is used to perform the following functions:
 
 This list is not exhaustive, and other features may be added during development.
 
-## Concept sketch
+## Initial Concept
 
 <p align="center">
   <img src="doc/res/global_concept_sketch.png" alt="image" width="500" height="auto">
+</p>
+
+## Assembly
+
+<p align="center">
+  <img src="doc/res/global_assembly_photo.jpg" alt="image" width="400" height="auto">
 </p>
 
 ## System overview
