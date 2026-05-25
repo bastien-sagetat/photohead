@@ -17,7 +17,7 @@ import json
 from websockets.asyncio.server import serve
 from websockets.asyncio.server import ServerConnection
 import signal
-
+from serial.tools import list_ports
 
 async def error(websocket: ServerConnection, message: str):
     """
@@ -28,7 +28,35 @@ async def error(websocket: ServerConnection, message: str):
         "type": "error",
         "message": message,
     }
+
     await websocket.send(json.dumps(event))
+
+
+async def scan(websocket: ServerConnection):
+    """
+    Send list of available serial ports.
+
+    """
+    ports: list[dict[str, str | int]] = [
+        {
+            "device": port.device,
+            "name": port.name,
+            "description": port.description,
+            "hwid": port.hwid,
+            "vid": port.vid,
+            "pid": port.pid,
+            "serial_number": port.serial_number,
+        }
+        for port in list_ports.comports() if (port.vid and port.pid and port.serial_number)
+    ]
+
+    event: dict[str, str | list] = {
+        "type": "scan",
+        "ports": ports,
+    }
+
+    await websocket.send(json.dumps(event))
+
 
 
 async def handler(websocket: ServerConnection):
@@ -46,7 +74,7 @@ async def handler(websocket: ServerConnection):
         event_type = event.get("type")
 
         if event_type == "scan":
-            pass
+            await scan(websocket)
         else:
             await error(websocket, "Unknown message type")
 
