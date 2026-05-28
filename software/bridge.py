@@ -96,7 +96,23 @@ async def scan(websocket: ServerConnection):
 
     await websocket.send(json.dumps(event))
 
+async def connect(websocket: ServerConnection):
+    """
+    Connect to serial port
 
+    """
+
+async def disconnect(websocket: ServerConnection):
+    """
+    Disconnect from serial port
+
+    """
+
+async def send(websocket: ServerConnection):
+    """
+    Send command to serial
+
+    """
 
 async def handler(websocket: ServerConnection):
     """
@@ -115,6 +131,10 @@ async def handler(websocket: ServerConnection):
 
             if event_type == "scan":
                 await scan(websocket)
+            else if event_type == "connect":
+                await connect(websocket)
+            else if event_type == "disconnect":
+                await disconnect(websocket)
             else:
                 await error(websocket, "Unknown message type")
     except ConnectionClosed:
