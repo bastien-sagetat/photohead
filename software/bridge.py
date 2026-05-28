@@ -62,19 +62,6 @@ class SerialClient:
         self.reader = None
         self.writer = None
 
-# client = SerialClient()
-# await client.connect()
-
-# # use client.queue ...
-
-# await client.close()
-
-# OR
-
-# async with SerialClient() as client:
-#     # use client.queue ...
-#     pass
-
 async def error(websocket: ServerConnection, message: str):
     """
     Send an error message.
