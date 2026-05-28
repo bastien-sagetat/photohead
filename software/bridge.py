@@ -19,13 +19,6 @@ from websockets.asyncio.server import ServerConnection
 import signal
 from serial.tools import list_ports
 import serialx
-from dataclasses import dataclass
-
-@dataclass
-class Request:
-    frame: bytes
-    future: asyncio.Future
-
 
 class SerialClient:
     def __init__(self, port, baudrate=115200, timeout=0.1):
@@ -33,61 +26,32 @@ class SerialClient:
         self.baudrate = baudrate
         self.timeout = timeout
 
-        self.queue = asyncio.Queue()
         self.reader = None
         self.writer = None
 
-        self.worker_task = None
-
     async def connect(self):
         self.reader, self.writer = await serialx.open_serial_connection(self.port, baudrate=115200)
-        self.worker_task = asyncio.create_task(self.worker())
-
-    async def worker(self):
+    
+    async def send(self, command: str) -> str:
         try:
-            while True:
-                req = await self.queue.get()
-
-                try:
-                    self.writer.write(req.frame)
-                    await self.writer.drain()
-
-                    response = await asyncio.wait_for(self.reader.readuntil(b'\n'), timeout=self.timeout)
-
-                    if not req.future.done():
-                        req.future.set_result(response)
-
-                except asyncio.TimeoutError as e:
-                    # flush input buffer to remove potential incomplete frame
-                    try:
-                        self.writer.transport.serial.reset_input_buffer()
-                    except Exception:
-                        pass
-
-                    if not req.future.done():
-                        req.future.set_exception(e)
-
-
-                except Exception as e:
-                    if not req.future.done():
-                        req.future.set_exception(e)
-
-                finally:
-                    self.queue.task_done()
-
-        except asyncio.CancelledError:
-            raise
-
-    async def close(self):
-        # stop worker
-        if self.worker_task:
-            self.worker_task.cancel()
+            self.writer.write(req.frame)
+            await self.writer.drain()
+    
+            response: bytes = await asyncio.wait_for(
+                self.reader.readuntil(b'\n'),
+                timeout=self.timeout
+            )
+    
+            return response.decode("utf-8", errors='replace').strip()
+    
+        except asyncio.TimeoutError:
             try:
-                await self.worker_task
-            except asyncio.CancelledError:
+                self.writer.transport.serial.reset_input_buffer()
+            except Exception:
                 pass
-
-        # close serial connection
+            raise
+            
+    async def disconnect(self):
         if self.writer:
             try:
                 self.writer.close()
@@ -97,14 +61,6 @@ class SerialClient:
 
         self.reader = None
         self.writer = None
-
-    async def __aenter__(self):
-        await self.connect()
-        return self
-
-    async def __aexit__(self, exc_type, exc, tb):
-        await self.close()
-
 
 # client = SerialClient()
 # await client.connect()
