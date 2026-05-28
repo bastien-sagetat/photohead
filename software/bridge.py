@@ -103,20 +103,26 @@ async def handler(websocket: ServerConnection):
     Handle a connection.
 
     """
-    async for message in websocket:
-        try:
-            event = json.loads(message)
-        except json.JSONDecodeError:
-            await error(websocket, "Invalid JSON message")
-            continue
+    try:
+        async for message in websocket:
+            try:
+                event = json.loads(message)
+            except json.JSONDecodeError:
+                await error(websocket, "Invalid JSON message")
+                continue
 
-        event_type = event.get("type")
+            event_type = event.get("type")
 
-        if event_type == "scan":
-            await scan(websocket)
-        else:
-            await error(websocket, "Unknown message type")
+            if event_type == "scan":
+                await scan(websocket)
+            else:
+                await error(websocket, "Unknown message type")
+    except ConnectionClosed:
+        print("Client disconnected")
 
+    finally:
+        print("Cleanup")
+        # TODO: stop stepper & disconnect serial
 
 async def main():
     async with serve(handler, "", 8080) as server:
