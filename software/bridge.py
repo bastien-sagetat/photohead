@@ -16,6 +16,7 @@ import asyncio
 import json
 from websockets.asyncio.server import serve
 from websockets.asyncio.server import ServerConnection
+from websockets.exceptions import ConnectionClosed
 import signal
 from serial.tools import list_ports
 import serialx
@@ -36,12 +37,7 @@ class SerialClient:
         try:
             self.writer.write(req.frame)
             await self.writer.drain()
-    
-            response: bytes = await asyncio.wait_for(
-                self.reader.readuntil(b'\n'),
-                timeout=self.timeout
-            )
-    
+            response: bytes = await asyncio.wait_for(self.reader.readuntil(b'\n'), timeout=self.timeout)
             return response.decode("utf-8", errors='replace').strip()
     
         except asyncio.TimeoutError:
