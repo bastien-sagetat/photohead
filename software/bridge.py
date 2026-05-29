@@ -134,6 +134,8 @@ async def handler(websocket: ServerConnection):
     Handle a connection.
 
     """
+
+    # TODO: check single client
     try:
         async for message in websocket:
             try:
