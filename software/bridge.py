@@ -20,69 +20,113 @@ from websockets.exceptions import ConnectionClosed
 import signal
 from serial.tools import list_ports
 from serial_client import serial_client
+from typing import Union, Literal, Annotated
+from pydantic import BaseModel, Field, TypeAdapter, ValidationError
 
-async def error(websocket: ServerConnection, message: str):
-    """
-    Send an error message.
+class SerialDevice(BaseModel):
+    device: str
+    name: str
+    description: str
+    hwid: str
+    vid: int
+    pid: int
+    serial_number: str
 
-    """
-    event: dict[str, str] = {
-        "type": "error",
-        "message": message,
-    }
-
-    await websocket.send(json.dumps(event))
+class ScanOkResponse(BaseModel):
+    type: Literal["scan"] = "scan"
+    status: Literal["ok"] = "ok"
+    devices: list[SerialDevice]
 
 
-async def scan(websocket: ServerConnection):
-    """
-    Send list of available serial ports.
+class ScanErrorResponse(BaseModel):
+    type: Literal["scan"] = "scan"
+    status: Literal["error"] = "error"
+    reason: str
 
-    """
-    ports: list[dict[str, str | int]] = [
-        {
-            "device": port.device,
-            "name": port.name,
-            "description": port.description,
-            "hwid": port.hwid,
-            "vid": port.vid,
-            "pid": port.pid,
-            "serial_number": port.serial_number,
-        }
-        for port in list_ports.comports() if (port.vid and port.pid and port.serial_number)
-    ]
 
-    event: dict[str, str | list] = {
-        "type": "scan",
-        "ports": ports,
-    }
+class ConnectOkResponse(BaseModel):
+    type: Literal["connect"] = "connect"
+    status: Literal["ok"] = "ok"
 
-    await websocket.send(json.dumps(event))
 
-async def connect(websocket: ServerConnection):
-    """
-    Connect to serial port
+class ConnectErrorResponse(BaseModel):
+    type: Literal["connect"] = "connect"
+    status: Literal["error"] = "error"
+    reason: str
 
-    """
-    serial_client.connect()
 
-async def disconnect(websocket: ServerConnection):
-    """
-    Disconnect from serial port
+class DisconnectOkResponse(BaseModel):
+    type: Literal["disconnect"] = "disconnect"
+    status: Literal["ok"] = "ok"
 
-    """
-    serial_client.disconnect()
-    
-async def send(websocket: ServerConnection):
-    """
-    Send command to serial
 
-    """
-    try:
-        serial_client.send()
-    except timeout as e:
+class DisconnectErrorResponse(BaseModel):
+    type: Literal["disconnect"] = "disconnect"
+    status: Literal["error"] = "error"
+    reason: str
 
-        
+class InvalidJSONErrorResponse(BaseModel):
+    type: Literal["disconnect"] = "disconnect"
+    status: Literal["error"] = "error"
+    reason: str
+
+
+class RequestBase(BaseModel):
+    async def process(self):
+        raise NotImplementedError
+
+
+class ScanRequest(RequestBase):
+    type: Literal["scan"]
+
+    async def process(self) -> str:
+        devices: list[SerialDevice] = [
+            SerialDevice(
+                device=port.device,
+                name=port.name,
+                description=port.description,
+                hwid=port.hwid,
+                vid=port.vid,
+                pid=port.pid,
+                serial_number=port.serial_number,
+            ) for port in list_ports.comports() if (port.vid is not None and port.pid is not None and port.serial_number is not None)
+        ]
+
+        response = ScanOkResponse(devices=devices)
+        return response.model_dump_json()
+
+
+class ConnectRequest(RequestBase):
+    type: Literal["connect"]
+    device: str
+
+    async def process(self)-> str:
+        await serial_client.connect(device=self.device)
+
+        response = ConnectOkResponse()
+        return response.model_dump_json()
+
+
+class DisconnectRequest(RequestBase):
+    type: Literal["disconnect"]
+
+    async def process(self)-> str:
+        await serial_client.disconnect()
+
+        response = DisconnectOkResponse()
+        return response.model_dump_json()
+
+Request = Annotated[
+    Union[
+        ScanRequest,
+        ConnectRequest,
+        DisconnectRequest
+    ],
+    Field(discriminator="type")
+]
+
+adapter: TypeAdapter = TypeAdapter(Request)
+
 async def handler(websocket: ServerConnection):
     """
     Handle a connection.
@@ -91,21 +135,20 @@ async def handler(websocket: ServerConnection):
     try:
         async for message in websocket:
             try:
-                event = json.loads(message)
-            except json.JSONDecodeError:
-                await error(websocket, "Invalid JSON message")
-                continue
+                request = adapter.validate_json(message)
 
-            event_type = event.get("type")
+                response = await request.process()
+                await websocket.send(response)
 
-            if event_type == "scan":
-                await scan(websocket)
-            else if event_type == "connect":
-                await connect(websocket)
-            else if event_type == "disconnect":
-                await disconnect(websocket)
-            else:
-                await error(websocket, "Unknown message type")
+            # Invalid JSON OR invalid schema
+            except ValidationError as e:
+                print(e)
+                # TODO: send error response ?
+
+            except Exception as e:
+                print(e)
+                # TODO: send error response ?
+
     except ConnectionClosed:
         print("Client disconnected")
 
