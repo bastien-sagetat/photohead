@@ -80,6 +80,8 @@ class ScanRequest(RequestBase):
     type: Literal["scan"]
 
     async def process(self) -> str:
+
+        # TODO: Move to serial_client.py and use serialx to get list of devices
         devices: list[SerialDevice] = [
             SerialDevice(
                 device=port.device,
