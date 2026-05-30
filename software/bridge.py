@@ -54,7 +54,7 @@ class ScanRequest(RequestBase):
 
     async def process(self) -> str:
 
-        devices: list[SerialDevice] = SerialClient.get_devices()
+        devices: list[SerialDevice] = await SerialClient.get_devices()
 
         response = ScanOkResponse(devices=devices)
         return response.model_dump_json()
