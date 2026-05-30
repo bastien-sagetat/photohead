@@ -11,6 +11,15 @@ License: MIT License
 
 import asyncio
 import serialx
+from pydantic import BaseModel
+
+class SerialDevice(BaseModel):
+    device: str
+    name: str
+    vid: int
+    pid: int
+    serial_number: str
+
 
 class SerialClient:
     def __init__(self):
@@ -63,5 +72,21 @@ class SerialClient:
 
         self.reader = None
         self.writer = None
+
+    @staticmethod
+    async def get_devices() -> list[SerialDevice]:
+        devices: list[SerialDevice] = [
+            await SerialDevice(
+                device=device.device,
+                name=device.resolved_device,
+                vid=device.vid,
+                pid=device.pid,
+                serial_number=device.serial_number,
+            ) for device in serialx.list_serial_ports() if (
+                device.vid is not None and device.pid is not None and device.serial_number is not None
+                )
+        ]
+        return devices
+
 
 serial_client = SerialClient()

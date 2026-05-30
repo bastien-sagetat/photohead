@@ -17,19 +17,10 @@ from websockets.asyncio.server import serve
 from websockets.asyncio.server import ServerConnection
 from websockets.exceptions import ConnectionClosed
 import signal
-from serial.tools import list_ports
-from serial_client import serial_client
+from serial_client import SerialDevice, SerialClient, serial_client
 from typing import Union, Literal, Annotated
 from pydantic import BaseModel, Field, TypeAdapter, ValidationError
 
-class SerialDevice(BaseModel):
-    device: str
-    name: str
-    description: str
-    hwid: str
-    vid: int
-    pid: int
-    serial_number: str
 
 class ScanOkResponse(BaseModel):
     type: Literal["scan"] = "scan"
@@ -63,18 +54,7 @@ class ScanRequest(RequestBase):
 
     async def process(self) -> str:
 
-        # TODO: Move to serial_client.py and use serialx to get list of devices
-        devices: list[SerialDevice] = [
-            SerialDevice(
-                device=port.device,
-                name=port.name,
-                description=port.description,
-                hwid=port.hwid,
-                vid=port.vid,
-                pid=port.pid,
-                serial_number=port.serial_number,
-            ) for port in list_ports.comports() if (port.vid is not None and port.pid is not None and port.serial_number is not None)
-        ]
+        devices: list[SerialDevice] = SerialClient.get_devices()
 
         response = ScanOkResponse(devices=devices)
         return response.model_dump_json()
