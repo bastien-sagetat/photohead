@@ -162,7 +162,8 @@ async def handler(websocket: ServerConnection):
                 # TODO: send error response ?
 
     except ConnectionClosed:
-        pass
+        print(f"Connection closed with code={e.code}")
+        print(f"Reason={e.reason}")
 
     finally:
         if active_client is websocket:
