@@ -37,21 +37,9 @@ class ScanOkResponse(BaseModel):
     devices: list[SerialDevice]
 
 
-class ScanErrorResponse(BaseModel):
-    type: Literal["scan"] = "scan"
-    status: Literal["error"] = "error"
-    reason: str
-
-
 class ConnectOkResponse(BaseModel):
     type: Literal["connect"] = "connect"
     status: Literal["ok"] = "ok"
-
-
-class ConnectErrorResponse(BaseModel):
-    type: Literal["connect"] = "connect"
-    status: Literal["error"] = "error"
-    reason: str
 
 
 class DisconnectOkResponse(BaseModel):
@@ -59,13 +47,8 @@ class DisconnectOkResponse(BaseModel):
     status: Literal["ok"] = "ok"
 
 
-class DisconnectErrorResponse(BaseModel):
-    type: Literal["disconnect"] = "disconnect"
-    status: Literal["error"] = "error"
-    reason: str
-
-class InvalidJSONErrorResponse(BaseModel):
-    type: Literal["disconnect"] = "disconnect"
+class ErrorResponse(BaseModel):
+    type: Literal["scan", "connect", "disconnect",]
     status: Literal["error"] = "error"
     reason: str
 
