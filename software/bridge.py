@@ -13,7 +13,6 @@ License: MIT License
 
 
 import asyncio
-import json
 from websockets.asyncio.server import serve
 from websockets.asyncio.server import ServerConnection
 from websockets.exceptions import ConnectionClosed
@@ -129,13 +128,22 @@ Request = Annotated[
 
 adapter: TypeAdapter = TypeAdapter(Request)
 
+active_client = None
+
 async def handler(websocket: ServerConnection):
     """
     Handle a connection.
 
     """
+    global active_client
 
-    # TODO: check single client
+    if active_client is not None:
+        await websocket.close(code=1008, reason="Only one client allowed")
+        return
+
+    active_client = websocket
+    print("Client connected")
+
     try:
         async for message in websocket:
             try:
@@ -154,10 +162,12 @@ async def handler(websocket: ServerConnection):
                 # TODO: send error response ?
 
     except ConnectionClosed:
-        print("Client disconnected")
+        pass
 
     finally:
-        print("Cleanup")
+        if active_client is websocket:
+            active_client = None
+        print("Client disconnected")
         # TODO: stop stepper & disconnect serial
 
 async def main():
