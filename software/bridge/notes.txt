@@ -1,0 +1,20 @@
+
+# Create a Python virtual environment
+python3 -m venv venv
+
+# Activate the Python virtual environment
+source venv/bin/activate
+
+# install the required Python packages from the requirements.tx file
+pip install -r requirements.txt
+
+# Check Python types
+mypy bridge.py
+
+# Websocket message examples:
+{"type":"scan"}
+{"type":"connect", "device":"/dev/ttyACM0"}
+{"type":"command", "command":"stepper_start"}
+{"type":"command", "command":"stepper_set_position 180 45"}
+{"type":"command", "command":"stepper_stop"}
+{"type":"disconnect"}
